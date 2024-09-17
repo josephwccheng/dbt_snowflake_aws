@@ -1,0 +1,33 @@
+version: 2
+
+sources:
+  - name: AWS_TO_S3_SCHEMA
+    database: AWS_TO_S3_DB
+    schema: AWS_TO_S3_SCHEMA
+    loader: S3
+    loaded_at_field: collector_hour
+
+    tables:
+      - name: dbt_ext_tbl_v2
+        description: "External table of Snowplow events stored as JSON files"
+        external:
+          location: "@AWS_S3_TABLE_1_STAGE" # reference an existing external stage
+          file_format: "( type = csv )" # fully specified here, or reference an existing file format
+          auto_refresh: false # requires configuring an event notification from Amazon S3 or Azure
+
+        # all Snowflake external tables natively include a `metadata$filename` pseudocolumn
+        # and a `value` column (JSON blob-ified version of file contents), so there is no need to specify
+        # them here. you may optionally specify columns to unnest or parse from the file:
+        columns:
+          - name: id
+            data_type: int
+            description: normal id"
+          - name: title
+            data_type: varchar(255)
+            description: "title"
+          - name: description
+            data_type: varchar(255)
+            description: "description"
+          - name: content
+            data_type: string
+            description: "content"
